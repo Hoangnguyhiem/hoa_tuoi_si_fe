@@ -5,6 +5,7 @@ import { toPng } from "html-to-image";
 import { useQuery } from "@tanstack/react-query";
 import instance from "@/configs/axios";
 import dayjs from "dayjs";
+import { Link } from "react-router-dom";
 
 const ProductPage = () => {
 
@@ -59,7 +60,8 @@ const ProductPage = () => {
 
 	return (
 		<div className="bg-slate-100 h-screen">
-			<div className="p-[10px] grid-cols-1 gap-2 grid lg:grid-cols-2 lg:gap-3">
+			<Link className="bg-blue-500 rounded-b-[5px] p-[5px_15px] ml-[10px] text-white fixed font-[700]" to={`/add`}>Thêm đơn</Link>
+			<div className="p-[10px] grid-cols-1 gap-2 grid lg:grid-cols-2 lg:gap-3 pt-[40px]">
 				{order?.data.map((item: any) => {
 					const hasUndelivered = item.products.every(
 						(p: any) => p.status === true);
@@ -72,14 +74,11 @@ const ProductPage = () => {
 										<div className="w-[100%] border-slate-300">
 											<div className="mb-[10px]">
 												<div className="flex justify-between">
-													<div className="font-[600] text-[17px] flex mb-[5px]">
-														<span className="mr-[10px]">{item?.userId?.name}</span>
-														<div className="pl-[10px] flex border-l-[1px] border-slate-300">
-															<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-																<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
-															</svg>
-															<span>{item?.userId?.phone}</span>
-														</div>
+													<div className="font-[600] text-[17px] mb-[5px] lg:flex">
+														<span className="lg:mr-[10px]">{item?.userId?.name}</span>
+														<span className="flex lg:border-l-[1px] lg:border-slate-300 lg:ml-[10px]">
+															{item?.userId?.phone}
+														</span>
 													</div>
 													<div className="font-[600]">{dayjs(item?.createdAt).format("DD/MM/YYYY HH:mm")}</div>
 												</div>
@@ -107,7 +106,7 @@ const ProductPage = () => {
 											<hr className="mb-[10px]" />
 											<div className="mb-[10px] bg-slate-100 rounded-[3px] p-[5px]">
 												<div className="flex justify-between">
-													<div className="w-[calc(100%-30px)]">
+													<div className="w-[calc(100%)]">
 														<table className="w-full">
 															<tr className="text-left">
 																<th>Đơn</th>
@@ -134,11 +133,11 @@ const ProductPage = () => {
 
 														</table>
 													</div>
-													<div className="w-[30px] flex items-center border-l-[1px] justify-center">
+													{/* <div className="w-[30px] flex items-center border-l-[1px] justify-center">
 														<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
 															<path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
 														</svg>
-													</div>
+													</div> */}
 												</div>
 
 											</div>
