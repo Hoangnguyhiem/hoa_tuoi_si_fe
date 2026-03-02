@@ -10,8 +10,6 @@ const FilterCategories = () => {
         }
     })
 
-    console.log(categories);
-
     return (
         <div className="">
             <div className="flex flex-wrap gap-2">
