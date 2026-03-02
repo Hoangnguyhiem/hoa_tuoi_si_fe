@@ -5,7 +5,7 @@ import { message } from "antd"
 export const orderMutations = () => {
 
     const queryClient = useQueryClient()
-    
+
     const orderAdd = useMutation({
         mutationFn: async (data: any) => {
             try {
@@ -19,9 +19,9 @@ export const orderMutations = () => {
                 type: "success",
                 content: "Thêm sản phẩm thành công"
             }),
-            queryClient.invalidateQueries({
-                queryKey: ["order"]
-            })
+                queryClient.invalidateQueries({
+                    queryKey: ["order"]
+                })
         },
         onError: (error) => {
             message.open({
@@ -29,7 +29,33 @@ export const orderMutations = () => {
                 content: error.message
             })
         }
+    });
+
+    const updateStatusProduct = useMutation({
+        mutationFn: async (data: any) => {
+            try {
+                return await orderSevices.updateStatusProduct(data)
+            } catch (error) {
+                throw new Error("Đã xảy ra lỗi vui lòng thử lại")
+            }
+        },
+        onSuccess: () => {
+            message.open({
+                type: "success",
+                content: "Cập nhập trạng thái thành công"
+            }),
+                queryClient.invalidateQueries({
+                    queryKey: ["order"]
+                })
+        },
+        onError: (error) => {
+            message.open({
+                type: "error",
+                content: error.message
+            })
+        }
+
     })
 
-    return { orderAdd }
+    return { orderAdd, updateStatusProduct }
 }

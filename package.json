@@ -31,6 +31,7 @@
     "caniuse-lite": "^1.0.30001770",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.19",
     "dotenv": "^16.4.5",
     "html-to-image": "^1.11.13",
@@ -38,6 +39,7 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.360.0",
     "react": "^18.2.0",
+    "react-date-range": "^2.0.1",
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
     "react-hook-form": "^7.52.2",
@@ -53,6 +55,7 @@
   },
   "devDependencies": {
     "@types/react": "^18.2.64",
+    "@types/react-date-range": "^1.4.10",
     "@types/react-dom": "^18.2.21",
     "@types/react-helmet": "^6.1.11",
     "@types/react-slick": "^0.23.13",

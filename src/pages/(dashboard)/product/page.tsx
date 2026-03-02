@@ -1,15 +1,24 @@
-import { useRef } from "react";
+import instance from "@/configs/axios";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import { toPng } from "html-to-image";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
-import { toPng } from "html-to-image";
-import { useQuery } from "@tanstack/react-query";
-import instance from "@/configs/axios";
-import dayjs from "dayjs";
-import { Link } from "react-router-dom";
-
+import CheckProducts from "./components/checkProducts";
+import FilterDate from "./components/filterDate";
+import FilterCategories from "./components/filterCategories";
+import FilterSearch from "./components/filterSearch";
 const ProductPage = () => {
 
 	const refs = useRef<Record<string, HTMLDivElement | null>>({});
+
+	const [show, setShow] = useState(true);
+	const [lastScrollY, setLastScrollY] = useState(0);
+
+	const [openModal, setOpenModal] = useState(false)
+	const [productItem, setProductItem] = useState(null)
 
 	// download ảnh
 	const handleDownload = async (id: string) => {
@@ -21,15 +30,10 @@ const ProductPage = () => {
 			pixelRatio: 2,
 			backgroundColor: "#ffffff"
 		});
-
-		if (/Android|iPhone/i.test(navigator.userAgent)) {
-			window.open(dataUrl, "_blank");
-		} else {
-			const link = document.createElement("a");
-			link.download = `don-hang-${id}.png`;
-			link.href = dataUrl;
-			link.click();
-		}
+		const link = document.createElement("a");
+		link.download = `don-hang-${id}.png`;
+		link.href = dataUrl;
+		link.click();
 	};
 
 	// copy ảnh
@@ -59,16 +63,50 @@ const ProductPage = () => {
 		}
 	})
 
+	useEffect(() => {
+		const handleScroll = () => {
+			const currentScrollY = window.scrollY;
+			if (currentScrollY > lastScrollY) {
+				setShow(false);
+			} else {
+				setShow(true);
+			}
+			setLastScrollY(currentScrollY);
+		};
+		window.addEventListener("scroll", handleScroll);
+		return () => {
+			window.removeEventListener("scroll", handleScroll);
+		};
+	}, [lastScrollY]);
+
+	const handlecheckItem = (data: any) => {
+		setOpenModal(!openModal)
+		setProductItem(data)
+	}
 
 	return (
-		<div className="bg-slate-100 h-screen">
-			<Link className="bg-blue-500 rounded-b-[5px] p-[5px_15px] ml-[10px] text-white fixed font-[700]" to={`/add`}>Thêm đơn</Link>
-			<div className="p-[10px] grid-cols-1 gap-2 grid lg:grid-cols-2 lg:gap-3 pt-[40px]">
-				{order?.data.map((item: any) => {
+		<div className="bg-slate-300 p-[10px] pt-0">
+
+			<div className={`sticky top-0 bg-slate-300 mx-[-10px] p-[10px] py-0 transition-transform duration-300 ${show ? "translate-y-0" : "-translate-y-full"}`}>
+
+				<div className="lg:flex lg:justify-between py-[10px]">
+					<div className="flex justify-between lg:block lg:w-[calc(100%-420px)]">
+						<FilterCategories />
+						<FilterDate />
+					</div>
+
+					<FilterSearch />
+				</div>
+				<hr />
+				<Link className="absolute bg-blue-500 rounded-b-[5px] p-[5px_15px] mx-[10px] text-white font-[700] top-[100%] right-0" to={`/add`}>Thêm đơn</Link>
+			</div>
+
+			<div className="grid-cols-1 gap-2 grid lg:grid-cols-2 lg:gap-3 mt-[45px]">
+				{order?.data.slice().reverse().map((item: any) => {
 					const hasUndelivered = item.products.every(
 						(p: any) => p.status === true);
 					return (
-						<div key={item._id} className="bg-white rounded-[5px] shadow-md">
+						<div key={item._id} className="bg-white rounded-[5px] shadow-2xl">
 							{/* phần muốn chụp */}
 							<div ref={(el) => (refs.current[item._id] = el)}>
 								<div className={`p-[10px_10px_0px_10px] border-r-[5px] ${hasUndelivered && item?.paid === 0 ? "border-green-500" : "border-red-500 "} rounded-t-[5px]`}>
@@ -114,20 +152,27 @@ const ProductPage = () => {
 																<th>Đơn</th>
 																<th>Màu</th>
 																<th>Giá</th>
-																<th>Số lượng</th>
+																<th>Bó</th>
+																<th>Kiện</th>
 																<th>Tổng</th>
-																<th className="text-center">Đã giao</th>
+																<th className="text-center">Giao</th>
 															</tr>
 															{
-																item.products.map((item: any) => (
-																	<tr className={`${!item.status ? "bg-red-200" : "bg-green-200"} border-b-[1px] font-[500]`}>
-																		<td>{item?.categoryId.name}</td>
-																		<td>{item?.colorId.name}</td>
-																		<td>x{Number(item?.price).toLocaleString("vi-VN") || 0}</td>
-																		<td>{item?.quantity}</td>
-																		<td>{Number(item?.total).toLocaleString("vi-VN") || 0}</td>
+																item.products.map((SubItem: any) => (
+																	<tr className={`${!SubItem.status ? "bg-red-200" : "bg-green-200"} border-b-[1px] font-[500]`}>
+																		<td>{SubItem?.categoryId.name}</td>
+																		<td>{SubItem?.colorId.name}</td>
+																		<td>x{Number(SubItem?.price).toLocaleString("vi-VN") || 0}</td>
+																		<td>{SubItem?.bundle}</td>
+																		<td>{SubItem?.quantity}</td>
+																		<td>{Number(SubItem?.total).toLocaleString("vi-VN") || 0}</td>
 																		<div className="h-[26px] flex justify-center items-center">
-																			<input className="" type="checkbox" />
+																			<input
+																				onChange={() => handlecheckItem(SubItem)}
+																				className=""
+																				type="checkbox"
+																				checked={SubItem.status}
+																			/>
 																		</div>
 																	</tr>
 																))
@@ -135,18 +180,13 @@ const ProductPage = () => {
 
 														</table>
 													</div>
-													{/* <div className="w-[30px] flex items-center border-l-[1px] justify-center">
-														<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-															<path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-														</svg>
-													</div> */}
 												</div>
-
 											</div>
 											<div className="w-full flex mb-[10px] justify-between">
 												<div className="flex justify-between w-[200px]">
 													<div className="font-[600]">
-														<p>Tổng cộng: </p>
+														<p>Tổng đơn: </p>
+														<p>Phí khác: </p>
 														<p>Đã thanh toán: </p>
 														{item.paid >= 0 ?
 															(<p>Cần thanh toán: </p>) :
@@ -155,6 +195,7 @@ const ProductPage = () => {
 													</div>
 													<div className="font-[700] text-right">
 														<p>{Number(item?.totalPrice).toLocaleString("vi-VN") || 0}</p>
+														<p>{Number(item?.otherFee).toLocaleString("vi-VN") || 0}</p>
 														<p>{Number(item?.pay).toLocaleString("vi-VN") || 0}</p>
 														{item?.paid > 0 ? (
 															<p className="text-red-700">{Number(item?.paid).toLocaleString("vi-VN") || 0}</p>
@@ -172,7 +213,7 @@ const ProductPage = () => {
 								</div>
 							</div>
 							<hr />
-							<div className="flex justify-center">
+							<div className="hidden md:flex justify-center">
 								<div className="flex m-[8px]">
 									<div onClick={() => handleDownload(item._id)} className="flex md:mr-[100px] cursor-pointer">
 										<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -182,7 +223,7 @@ const ProductPage = () => {
 											Tải ảnh
 										</button>
 									</div>
-									<div onClick={() => handleCopy(item._id)} className="cursor-pointer hidden md:flex">
+									<div onClick={() => handleCopy(item._id)} className="cursor-pointer flex">
 										<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
 											<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
 										</svg>
@@ -196,6 +237,7 @@ const ProductPage = () => {
 					)
 				})}
 			</div>
+			<CheckProducts openModal={openModal} setOpenModal={setOpenModal} productItem={productItem} />
 		</div>
 	);
 }

@@ -42,7 +42,7 @@ const UserAdd = ({ phone, setPhone, setOpenAddUser }: any) => {
                     <div className="mb-[5px]">
                         <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-[2px]">Số điện thoại</label>
                         <input
-                            {...register("phone")}
+                            {...register("phone", { required: true })}
                             type="text"
                             placeholder="Số điện thoại"
                             className="w-full border border-gray-300 p-[8px_10px] rounded-md"

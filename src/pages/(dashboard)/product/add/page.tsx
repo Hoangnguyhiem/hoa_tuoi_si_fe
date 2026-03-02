@@ -6,6 +6,9 @@ import instance from '@/configs/axios';
 import UserAdd from '../components/userAdd';
 import userServices from '@/services/userServices';
 import { orderMutations } from '@/hooks/orderMutations';
+import { Link, useNavigate } from 'react-router-dom';
+import orderSevices from '@/services/orderSevices';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 
 const ProductAddPage = () => {
     const [openAddUser, setOpenAddUser] = useState(true);
@@ -18,6 +21,18 @@ const ProductAddPage = () => {
     const savedUserId = localStorage.getItem("userId");
 
     const { orderAdd } = orderMutations()
+    const navigate = useNavigate()
+
+    const { register, control, handleSubmit, reset, watch } = useForm({
+        defaultValues: {
+            userId: userId,
+            deliveryId: "",
+            products: [{ categoryId: "", colorId: "", price: 0, bundle: 1, quantity: 1 }],
+            note: "",
+            otherFee: 0,
+            pay: 0
+        }
+    })
 
     useEffect(() => {
         if (userId)
@@ -58,6 +73,7 @@ const ProductAddPage = () => {
     const deleteUser = () => {
         localStorage.removeItem("userId");
         setUserId(null)
+        setValue("")
     }
 
     const { data: color } = useQuery({
@@ -66,7 +82,6 @@ const ProductAddPage = () => {
             return await instance.get(`/color`)
         }
     })
-
 
     const { data: delivery } = useQuery({
         queryKey: ["delivery"],
@@ -82,69 +97,58 @@ const ProductAddPage = () => {
         },
     })
 
+    const { data: lastDeliveryId } = useQuery({
+        queryKey: ["lastDeliveryId", userId],
+        queryFn: async () => {
+            return await orderSevices.getDeliveryId(userId)
+        },
+        enabled: !!userId
+    })
 
-    const [products, setProducts] = useState<any>([{ id: Date.now(), categoryId: "", colorId: "", price: 0, quantity: 1 }])
+    const products = useWatch({
+        control,
+        name: "products"
+    });
+    const pay = useWatch({
+        control,
+        name: "pay"
+    });
+    const otherFee = useWatch({
+        control,
+        name: "otherFee"
+    });
 
-    const handleChage = (id: any, field: string, value: any) => {
-        setProducts((prev: any) =>
-            prev.map((r: any) =>
-                r.id === id ? { ...r, [field]: value } : r
-            )
-        )
-    }
+    const total = useMemo(() => {
+        return products?.reduce((sum, item) => {
+            return sum + (Number(item.price) * Number(item.bundle) * Number(item.quantity))
+        }, 0)
+    }, [products])
 
-    const addRow = () => {
-        setProducts((prev: any) => [
-            ...prev,
-            {
-                id: Date.now(),
-                categoryId: "",
-                colorId: "",
-                price: 0,
-                quantity: 1
-            },
-        ]);
-    };
+    const mountTotal = useMemo(() => {
+        return total + Number(otherFee) - Number(pay)
+    }, [total, otherFee, pay])
 
-    const removeRow = (id: number) => {
-        setProducts((prev: any) => prev.filter((i: any) => i.id !== id));
-    };
-
-    const total = products.reduce((sum: any, r: any) => sum + r.price * r.quantity, 0);
-    const [mountTotal, setMountTotal] = useState<any>()
-    const [number, setNumber] = useState(0);
-    const handleMountTotal = (num: number) => {
-        setNumber(num);
-    };
     useEffect(() => {
-        setMountTotal(total - number);
-    }, [total, number]);
+        if (userId) {
+            reset((prev) => ({
+                ...prev,
+                userId: userId,
+                deliveryId: lastDeliveryId?.deliveryId
+            }));
+        }
+    }, [lastDeliveryId, userId, reset]);
 
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "products"
+    });
 
-    const [deliveryId, setDelivery] = useState()
-    const [note, setNot] = useState()
-
-    const handleDelivery = (data: any) => {
-        setDelivery(data)
-    }
-    const handleNote = (data: any) => {
-        setNot(data);
-    }
-
-
-    const handleAddProduct = () => {
-        const payload = products.map((item: any) => {
-            const newItem = { ...item };
-            delete newItem.id;
-            return newItem;
-        });
-        console.log(userId);
-        console.log(deliveryId);
-        console.log(note);
-        console.log(payload);
-
-        orderAdd.mutate({ userId, deliveryId, note, products: payload, pay: number })
-    }
+    const onSubmit = (data: any) => {
+        orderAdd.mutate(data);
+        reset();
+        navigate(`/`);
+        localStorage.removeItem("userId");
+    };
 
     return (
         <div className="p-[10px] w-[100%] lg:w-[700px] m-auto">
@@ -173,7 +177,7 @@ const ProductAddPage = () => {
                                             <div className="absolute w-full border mt-1 bg-white rounded shadow max-h-40 overflow-auto z-50">
 
                                                 {/* list match */}
-                                                {filtered.map((item: any, i: number) => (
+                                                {filtered?.slice().reverse().map((item: any, i: number) => (
                                                     <div
                                                         key={i}
                                                         className="p-2 hover:bg-gray-100 cursor-pointer"
@@ -183,7 +187,7 @@ const ProductAddPage = () => {
                                                             setShow(false);
                                                         }}
                                                     >
-                                                        {item.phone}   {"(" + item.name + ")"}
+                                                        {item.phone + " (" + item.name + ")"}
                                                     </div>
                                                 ))}
 
@@ -204,6 +208,7 @@ const ProductAddPage = () => {
                                         )}
                                     </div>
                                 </div>
+                                <Link to={`/`} className="bg-slate-500 p-[5px_15px] rounded-[3px] text-white font-[600] cursor-pointer float-end">Trở lại</Link>
                             </div>
                         </div>
                     </form>
@@ -218,18 +223,13 @@ const ProductAddPage = () => {
 
             {userId &&
                 <div className="">
-                    <form className="">
+                    <form onSubmit={handleSubmit(onSubmit)} className="">
                         <div className="">
                             <div className="mb-[10px]">
                                 <div className="flex justify-between">
                                     <div className="font-[700] flex">
                                         <span className="mr-[10px]">{userById?.name}</span>
-                                        <div className="pl-[10px] flex border-l-[1px] border-slate-300">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
-                                            </svg>
-                                            <span>{userById?.phone}</span>
-                                        </div>
+                                        <span className="pl-[10px] flex border-l-[1px] border-slate-300">{userById?.phone}</span>
                                     </div>
                                 </div>
                                 <div>
@@ -240,8 +240,8 @@ const ProductAddPage = () => {
 
                             <div className="mb-[5px]">
                                 <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-[2px]">Số nhà xe</label>
-                                <select onChange={(e) => handleDelivery(e.target.value)} className='w-[100%] border-[1px] p-[9px_10px] rounded-[5px]' name="" id="">
-                                    <option value="" selected>Chọn nhà xe</option>
+                                <select {...register("deliveryId")} className='w-[100%] border-[1px] p-[9px_10px] rounded-[5px]'>
+                                    <option value="">Chọn nhà xe</option>
                                     {delivery?.data.map((item: any) => (
                                         <option key={item._id} value={item._id}>{item.name + " (" + item.phone + ")" + " - " + item.type + " - (" + item.address + " - " + item.province + ")"}</option>
                                     ))}
@@ -249,7 +249,7 @@ const ProductAddPage = () => {
                             </div>
                             <div className="">
                                 <label htmlFor="" className="block text-sm font-medium text-gray-700 mb-[2px]">Ghi chú</label>
-                                <textarea onChange={e => handleNote(e.target.value)} className="w-full p-[10px] h-[45px] border-[1px] rounded-[5px]" placeholder="Nhập ghi chú..."></textarea>
+                                <textarea {...register("note")} className="w-full p-[10px] h-[45px] border-[1px] rounded-[5px]" placeholder="Nhập ghi chú..."></textarea>
                             </div>
                         </div>
 
@@ -263,76 +263,95 @@ const ProductAddPage = () => {
                                                 <th>Đơn</th>
                                                 <th>Màu</th>
                                                 <th>Giá</th>
+                                                <th>Số bó</th>
                                                 <th>Số lượng</th>
                                                 <th>Tổng</th>
                                                 <th className="text-center">Thao tác</th>
                                             </tr>
-                                            {products.map((item: any) => (
-                                                <tr key={item._id} className="*:px-[10px]">
-                                                    <td>
-                                                        <select onChange={e => handleChage(item.id, "categoryId", e.target.value)} className='py-[9px] rounded-[5px] border-b-gray-400 border-[1px]' name="" id="">
-                                                            <option selected value="">Chọn</option>
-                                                            {
-                                                                category?.data.map((item: any) => (
-                                                                    <option value={item._id}>{item.name}</option>
-                                                                ))
-                                                            }
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <select onChange={e => handleChage(item.id, "colorId", e.target.value)} className='py-[9px] rounded-[5px] border-b-gray-400 border-[1px]' name="" id="">
-                                                            <option selected value="">Chọn</option>
-                                                            {
-                                                                color?.data.map((item: any) => (
-                                                                    <option key={item._id} value={item._id}>{item?.name}</option>
-                                                                ))
-                                                            }
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <input
-                                                            onChange={e => handleChage(item.id, "price", e.target.value)}
-                                                            type="text"
-                                                            placeholder="Nhập giá"
-                                                            className="max-w-[100px] border border-gray-300 p-[8px_10px] rounded-md"
-                                                        />
-                                                    </td>
-                                                    <td>
-                                                        <input
-                                                            onChange={e => handleChage(item.id, "quantity", e.target.value)}
-                                                            defaultValue={1}
-                                                            min={1}
-                                                            type="number"
-                                                            className=" max-w-[70px] border border-gray-300 p-[8px_10px] rounded-md"
-                                                        />
-                                                    </td>
-                                                    <td>{Number(item.price * item.quantity).toLocaleString("vi-VN")}</td>
-                                                    <td>
-                                                        <div onClick={() => removeRow(item.id)} className="flex justify-center cursor-pointer hover:bg-red-500 hover:text-white font-[600] rounded-[5px] py-[2px]">
-                                                            <span>Xóa</span>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                            {fields.map((item: any, index: number) => {
+                                                const price = watch(`products.${index}.price`)
+                                                const bundle = watch(`products.${index}.bundle`)
+                                                const quantity = watch(`products.${index}.quantity`)
+                                                const subTotal = Number(price) * Number(bundle) * Number(quantity)
+                                                return (
+                                                    <tr key={item._id} className="*:px-[10px]">
+                                                        <td>
+                                                            <select {...register(`products.${index}.categoryId`, { required: true })} className='py-[9px] rounded-[5px] border-b-gray-400 border-[1px]'>
+                                                                <option value="">Chọn</option>
+                                                                {
+                                                                    category?.data.map((item: any) => (
+                                                                        <option key={item._id} value={item._id}>{item.name}</option>
+                                                                    ))
+                                                                }
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select {...register(`products.${index}.colorId`, { required: true })} className='py-[9px] rounded-[5px] border-b-gray-400 border-[1px]'>
+                                                                <option selected value="">Chọn</option>
+                                                                {
+                                                                    color?.data.map((item: any) => (
+                                                                        <option key={item._id} value={item._id}>{item?.name}</option>
+                                                                    ))
+                                                                }
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                {...register(`products.${index}.price`, { required: true })}
+                                                                min={1}
+                                                                type="number"
+                                                                placeholder="Nhập giá"
+                                                                className="max-w-[100px] border border-gray-300 p-[8px_10px] rounded-md"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                {...register(`products.${index}.bundle`, { required: true })}
+                                                                type="number"
+                                                                placeholder="Nhập số bó"
+                                                                className=" max-w-[70px] border border-gray-300 p-[8px_10px] rounded-md"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                {...register(`products.${index}.quantity`, { required: true })}
+                                                                type="number"
+                                                                placeholder="Nhập số lượng"
+                                                                className=" max-w-[70px] border border-gray-300 p-[8px_10px] rounded-md"
+                                                            />
+                                                        </td>
+                                                        <td>{Number(subTotal).toLocaleString("vi-VN")}</td>
+                                                        <td>
+                                                            <div onClick={() => remove(index)} className={` ${index === 0 ? "hidden" : ""} flex justify-center cursor-pointer hover:bg-red-500 hover:text-white font-[600] rounded-[5px] py-[2px]`}>
+                                                                <span>Xóa</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })}
                                         </table>
                                     </div>
                                     <div className="flex justify-between mt-[10px]">
-                                        <div className="font-[700] flex justify-between">
-                                            <div className="mr-[20px]">
-                                                <p>Tổng cộng: </p>
+                                        <div className="font-[600] flex justify-between">
+                                            <div className="mr-[20px] *:my-[2px]">
+                                                <p>Tổng đơn: </p>
+                                                <p>Phí khác: </p>
                                                 <p>Đã thanh toán: </p>
                                                 <p>Cần thanh toán: </p>
                                             </div>
-                                            <div className="">
+                                            <div className="font-[700] *:my-[2px] *:text-right">
                                                 <p>{Number(total).toLocaleString("vi-VN")}</p>
                                                 <p>
-                                                    <input defaultValue={0} onChange={(e: any) => handleMountTotal(e.target.value)} className='w-[100px]' type="text" />
+                                                    <input {...register("otherFee")} min={0} className='w-[100px] text-right' type="number" />
                                                 </p>
-                                                <p>{Number(mountTotal || 0).toLocaleString("vi-VN")}</p>
+                                                <p>
+                                                    <input {...register("pay", { required: true })} min={0} className='w-[100px] text-right' type="number" />
+                                                </p>
+                                                <p>{Number(mountTotal).toLocaleString("vi-VN")}</p>
                                             </div>
                                         </div>
-                                        <div onClick={addRow} className="">
-                                            <div className="border-[1px] border-black rounded-[5px]">
+                                        <div className="">
+                                            <div onClick={() => append({ categoryId: "", colorId: "", price: 0, bundle: 1, quantity: 1 })} className="border-[1px] border-black rounded-[5px]">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                                 </svg>
@@ -344,8 +363,8 @@ const ProductAddPage = () => {
                             </div>
                         </div>
                         <div className="float-end mt-[10px] flex">
-                            <div onClick={deleteUser} className='bg-slate-500 p-[5px_15px] rounded-[3px] text-white font-[600] cursor-pointer'>Trở lại</div>
-                            <div onClick={handleAddProduct} className='bg-blue-500 p-[5px_15px] rounded-[3px] text-white font-[600] ml-[10px] cursor-pointer'>Tạo đơn hàng</div>
+                            <div onClick={() => { deleteUser(), reset() }} className='bg-slate-500 p-[5px_15px] rounded-[3px] text-white font-[600] cursor-pointer'>Trở lại</div>
+                            <button className='bg-blue-500 p-[5px_15px] rounded-[3px] text-white font-[600] ml-[10px] cursor-pointer'>Tạo đơn hàng</button>
                         </div>
                     </form>
                 </div>
