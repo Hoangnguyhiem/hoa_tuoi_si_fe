@@ -101,7 +101,7 @@ const ProductPage = () => {
 				<Link className="absolute bg-blue-500 rounded-b-[5px] p-[5px_15px] mx-[10px] text-white font-[700] top-[100%] right-0" to={`/add`}>Thêm đơn</Link>
 			</div>
 
-			<div className="grid-cols-1 gap-2 grid lg:grid-cols-2 lg:gap-3 mt-[45px]">
+			<div className="grid-cols-1 gap-2 grid lg:grid-cols-2 lg:gap-3 pt-[45px]">
 				{order?.data.slice().reverse().map((item: any) => {
 					const hasUndelivered = item.products.every(
 						(p: any) => p.status === true);
