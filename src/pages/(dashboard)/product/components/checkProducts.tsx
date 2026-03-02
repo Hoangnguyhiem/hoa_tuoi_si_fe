@@ -1,5 +1,4 @@
 import { orderMutations } from '@/hooks/orderMutations';
-import React from 'react';
 
 const CheckProducts = ({ openModal, setOpenModal, productItem }: any) => {
 

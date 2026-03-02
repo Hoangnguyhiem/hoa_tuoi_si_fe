@@ -1,6 +1,5 @@
 import instance from '@/configs/axios';
 import { useQuery } from '@tanstack/react-query';
-import React from 'react';
 
 const FilterCategories = () => {
 
