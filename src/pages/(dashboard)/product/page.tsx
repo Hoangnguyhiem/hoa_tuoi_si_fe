@@ -63,24 +63,28 @@ const ProductPage = () => {
 		}
 	})
 
-useEffect(() => {
-	const handleScroll = () => {
-		const currentScrollY = window.scrollY;
+	useEffect(() => {
+		const handleScroll = () => {
+			const currentScrollY = window.scrollY;
 
-		if (Math.abs(currentScrollY - lastScrollY) < 10) return; // bỏ qua scroll nhỏ
+			// 👉 nếu đang ở top thì luôn show
+			if (currentScrollY <= 0) {
+				setShow(true);
+				return;
+			}
 
-		if (currentScrollY > lastScrollY) {
-			setShow(false);
-		} else {
-			setShow(true);
-		}
+			if (currentScrollY > lastScrollY) {
+				setShow(false);
+			} else {
+				setShow(true);
+			}
 
-		setLastScrollY(currentScrollY);
-	};
+			setLastScrollY(currentScrollY);
+		};
 
-	window.addEventListener("scroll", handleScroll);
-	return () => window.removeEventListener("scroll", handleScroll);
-}, [lastScrollY]);
+		window.addEventListener("scroll", handleScroll);
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, [lastScrollY]);
 
 	const handlecheckItem = (data: any) => {
 		setOpenModal(!openModal)
