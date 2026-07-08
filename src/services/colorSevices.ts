@@ -11,11 +11,8 @@ const colorSevices = {
         return res.data
     },
 
-    deleteCtegories: async (id: any) => {
-
-        console.log(id);
-        
-        const res = await instance.delete(`/category_delete/${id}`)
+    deleteColor: async (id: any) => {
+        const res = await instance.delete(`/color_delete/${id}`)
         return res.data
     }
 }

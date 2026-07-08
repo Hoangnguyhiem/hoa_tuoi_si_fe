@@ -31,5 +31,32 @@ export const colorsMutations = () => {
         }
     });
 
-    return { colorsAdd }
+    const colorDelete = useMutation({
+        mutationFn: async (id) => {
+            console.log(id);
+            
+            try {
+                return colorSevices.deleteColor(id)
+            } catch (error) {
+                throw new Error(`Thao tác thất bại`)
+            }
+        },
+        onSuccess: () => {
+            message.open({
+                type: "success",
+                content: "Xóa màu thành công"
+            }),
+                queryClient.invalidateQueries({
+                    queryKey: ["color"]
+                })
+        },
+        onError: (error) => {
+            message.open({
+                type: "error",
+                content: error.message
+            })
+        }
+    })
+
+    return { colorsAdd, colorDelete }
 }

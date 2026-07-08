@@ -1,13 +1,16 @@
 import { deliveryMutations } from '@/hooks/deliveryMutations';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
 const DeliveryAddPage = () => {
 
+    const navigater = useNavigate()
     const { deliveryAdd } = deliveryMutations()
     const { register, handleSubmit } = useForm()
 
     const onSubmit = (data: any) => {
         deliveryAdd.mutate(data)
+        navigater(`delivery`)
     }
     return (
         <div className="p-[10px] w-[100%] lg:w-[700px] m-auto">
@@ -54,8 +57,12 @@ const DeliveryAddPage = () => {
                             </div>
                             <div className="mb-[5px]">
                                 <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-[2px]">Loại xe</label>
-                                <select {...register("type")} className='w-full border border-gray-300 p-[8px_10px] rounded-md'>
-                                    <option value="null">Null</option>
+                                <select {...register("type", {required: true})} className='w-full border border-gray-300 p-[8px_10px] rounded-md'>
+                                    <option className='bg-slate-200 text-white' value="">Chọn</option>
+                                    <option value="Xe lạnh">Xe lạnh</option>
+                                    <option value="Xe khách">Xe khách</option>
+                                    <option value="Xe tải">Xe tải</option>
+                                    <option value="Xe thô sơ">Xe thô sơ</option>
                                 </select>
                             </div>
                             <div className="mb-[5px]">

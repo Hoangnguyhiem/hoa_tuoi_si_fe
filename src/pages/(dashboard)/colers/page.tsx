@@ -1,11 +1,12 @@
 import { categoriesMutations } from '@/hooks/categoriesMutations';
+import { colorsMutations } from '@/hooks/colorsMutations';
 import colorSevices from '@/services/colorSevices';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 
 const ColorPage = () => {
 
-    const { categoriesDelete } = categoriesMutations()
+    const { colorDelete } = colorsMutations()
 
     const { data: color } = useQuery({
         queryKey: ["color"],
@@ -16,11 +17,11 @@ const ColorPage = () => {
 
     const handleDeleteColor = (id: any) => {
         const confirmDelete = window.confirm(
-            "Bạn có chắc muốn xóa danh mục này không?"
+            "Bạn có chắc muốn xóa màu này không?"
         );
 
         if (!confirmDelete) return;
-        categoriesDelete.mutate(id)
+        colorDelete.mutate(id)
     }
     return (
         <div className="mx-[10px]">
