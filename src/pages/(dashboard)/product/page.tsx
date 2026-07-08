@@ -29,12 +29,18 @@ const ProductPage = () => {
 		const el = refs.current[id];
 		if (!el) return;
 
+		const width = el.scrollWidth;
+		const height = el.scrollHeight;
+
+		const targetWidth = 800;
+		const targetHeight = (height / width) * targetWidth;
+
 		const dataUrl = await toPng(el, {
 			cacheBust: true,
 			pixelRatio: 2,
 			backgroundColor: "#ffffff",
-			canvasWidth: 900,
-			canvasHeight: 500,
+			canvasWidth: targetWidth,
+			canvasHeight: targetHeight,
 		});
 		const link = document.createElement("a");
 		link.download = `don-hang-${id}.png`;
@@ -47,12 +53,18 @@ const ProductPage = () => {
 		const el = refs.current[id];
 		if (!el) return;
 
+		const width = el.scrollWidth;
+		const height = el.scrollHeight;
+
+		const targetWidth = 800;
+		const targetHeight = (height / width) * targetWidth;
+
 		const dataUrl = await toPng(el, {
 			cacheBust: true,
 			pixelRatio: 2,
 			backgroundColor: "#ffffff",
-			canvasWidth: 900,
-			canvasHeight: 500,
+			canvasWidth: targetWidth,
+			canvasHeight: targetHeight,
 		});
 
 		const blob = await (await fetch(dataUrl)).blob();
@@ -103,7 +115,7 @@ const ProductPage = () => {
 
 	const [status, setStatus] = useState("pending")
 	const { data: order } = useQuery({
-		queryKey: ["order" ,status, currentPage, currentLimit, debouncedKeyword],
+		queryKey: ["order", status, currentPage, currentLimit, debouncedKeyword],
 		queryFn: async () => {
 			return await instance.get(`order?status=${status}&search=${debouncedKeyword}&page=${currentPage}&limit=${currentLimit}`)
 		},
@@ -174,9 +186,9 @@ const ProductPage = () => {
 			refs.current[updatedId]
 		) {
 			refs.current[updatedId]?.scrollIntoView({
-					behavior: "smooth",
-					block: "center"
-				});
+				behavior: "smooth",
+				block: "center"
+			});
 		}
 	}, [order]);
 
@@ -199,8 +211,8 @@ const ProductPage = () => {
 			</div>
 
 			<div className="flex *:p-[5px_10px] my-[10px] rounded-[10px] overflow-hidden border w-fit bg-white text-slate-300 font-[600] cursor-pointer">
-				<div onClick={() => setStatus("pending")} className={`${status === "pending" ? "bg-red-400 text-white border-b-[2px] border-red-800" : "" }`}>Cần xử lý</div>
-				<div onClick={() => setStatus("success")} className={`${status === "success" ? "bg-green-400 text-white border-b-[2px] border-green-800" : "" }`}>Hoàn tất</div>
+				<div onClick={() => setStatus("pending")} className={`${status === "pending" ? "bg-red-400 text-white border-b-[2px] border-red-800" : ""}`}>Cần xử lý</div>
+				<div onClick={() => setStatus("success")} className={`${status === "success" ? "bg-green-400 text-white border-b-[2px] border-green-800" : ""}`}>Hoàn tất</div>
 			</div>
 			<div className="grid-cols-1 gap-2 grid sm:grid-cols-2 lg:grid-cols-3 lg:gap-3">
 				{order?.data?.data.map((item: any) => {
@@ -210,9 +222,7 @@ const ProductPage = () => {
 						return total + SubItem?.quantity;
 					}, 0);
 					return (
-						<div key={item._id} ref={(el) =>
-							refs.current[item._id] = el
-						} className={`${updatedId === item._id
+						<div key={item._id} className={`${updatedId === item._id
 							? "animate-highlight"
 							: ""}
 							bg-white rounded-[5px] shadow-2xl relative border-r-[5px] ${hasUndelivered && item?.paid === 0 ? "border-green-500" : "border-red-500 "}`}>
