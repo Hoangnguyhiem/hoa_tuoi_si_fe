@@ -101,8 +101,6 @@ const FilterDate = () => {
             setRange(restored);
             setRangePending(restored);
             setActivePreset(parsed.label);
-            console.log(parsed.label);
-            
         } catch (err) {
             console.error("Invalid dateRange in localStorage");
         }
@@ -159,7 +157,7 @@ const FilterDate = () => {
     };
 
     return (
-        <div className="relative lg:mt-[10px]">
+        <div className="relative mt-[10px]">
             {/* Trigger */}
             <div
                 onClick={() => {
@@ -179,15 +177,18 @@ const FilterDate = () => {
 
                     <span className="font-semibold">
                         {activePreset + ": "}
-                        {range[0].startDate.toLocaleDateString("vi-VN")} -{" "}
-                        {range[0].endDate.toLocaleDateString("vi-VN")}
+                        {/* {range[0].startDate.toLocaleDateString("vi-VN")} -{" "}
+                        {range[0].endDate.toLocaleDateString("vi-VN")} */}
+
+                        {range[0].startDate.toLocaleDateString("vi-VN") === range[0].endDate.toLocaleDateString("vi-VN") ?  range[0].startDate.toLocaleDateString("vi-VN"):
+                        range[0].startDate.toLocaleDateString("vi-VN") + " - " + range[0].endDate.toLocaleDateString("vi-VN")}
                     </span>
                 </div>
             </div>
 
             {/* Dropdown */}
             {open && (
-                <div className="absolute z-20 right-0 lg:left-0 mt-[5px] flex rounded overflow-hidden border shadow-lg">
+                <div className="absolute z-20 lg:left-0 mt-[5px] flex rounded overflow-hidden border shadow-lg">
 
                     {/* Presets */}
                     <div className="w-[150px] border-r p-[10px] bg-white text-[14px] text-slate-600">

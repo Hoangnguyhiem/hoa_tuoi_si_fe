@@ -1,13 +1,13 @@
 import instance from "@/configs/axios"
 
-const colorSevices = {
-    addColor: async (data: any) => {
-        const res = await instance.post(`/color_add`, data)
+const categoriesSevices = {
+    addCategories: async (data: any) => {
+        const res = await instance.post(`/category_add`, data)
         return res.data
     },
 
-    listAllColor: async () => {
-        const res = await instance.get(`/color`)
+    listAllCategories: async () => {
+        const res = await instance.get(`/category`)
         return res.data
     },
 
@@ -20,4 +20,4 @@ const colorSevices = {
     }
 }
 
-export default colorSevices
+export default categoriesSevices

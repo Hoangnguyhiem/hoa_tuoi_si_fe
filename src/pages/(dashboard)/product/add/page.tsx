@@ -146,7 +146,7 @@ const ProductAddPage = () => {
     const onSubmit = (data: any) => {
         orderAdd.mutate(data);
         reset();
-        navigate(`/`);
+        navigate(`/order`);
         localStorage.removeItem("userId");
     };
 
@@ -208,7 +208,7 @@ const ProductAddPage = () => {
                                         )}
                                     </div>
                                 </div>
-                                <Link to={`/`} className="bg-slate-500 p-[5px_15px] rounded-[3px] text-white font-[600] cursor-pointer float-end">Trở lại</Link>
+                                <Link to={`/order`} className="bg-slate-500 p-[5px_15px] rounded-[3px] text-white font-[600] cursor-pointer float-end">Trở lại</Link>
                             </div>
                         </div>
                     </form>
@@ -240,7 +240,7 @@ const ProductAddPage = () => {
 
                             <div className="mb-[5px]">
                                 <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-[2px]">Số nhà xe</label>
-                                <select {...register("deliveryId")} className='w-[100%] border-[1px] p-[9px_10px] rounded-[5px]'>
+                                <select {...register("deliveryId", {required: true})} className='w-[100%] border-[1px] p-[9px_10px] rounded-[5px]'>
                                     <option value="">Chọn nhà xe</option>
                                     {delivery?.data.map((item: any) => (
                                         <option key={item._id} value={item._id}>{item.name + " (" + item.phone + ")" + " - " + item.type + " - (" + item.address + " - " + item.province + ")"}</option>

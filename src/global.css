@@ -152,3 +152,44 @@ input[type="checkbox"]:checked::before {
     left: 0;
   }
 }
+
+@keyframes highlight {
+
+    0% {
+        background: greenyellow;
+    }
+
+    100% {
+        background: white;
+    }
+}
+
+.animate-highlight {
+    animation: highlight 2s ease;
+}
+
+@keyframes slideUp {
+	from {
+		transform: translateY(100%);
+	}
+	to {
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideDown {
+	from {
+		transform: translateY(0);
+	}
+	to {
+		transform: translateY(100%);
+	}
+}
+
+.modal-open {
+	animation: slideUp 0.3s ease;
+}
+
+.modal-close {
+	animation: slideDown 0.3s ease forwards;
+}
