@@ -1,4 +1,3 @@
-import { useState } from 'react';
 
 const Pagination = ({totalPage, currentPage, setCurrentPage}: any) => {
     

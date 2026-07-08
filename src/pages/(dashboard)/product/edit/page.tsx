@@ -4,7 +4,7 @@ import orderSevices from '@/services/orderSevices';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 const ProductEditPage = () => {
     const { id } = useParams()
