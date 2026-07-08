@@ -1,4 +1,3 @@
-import { categoriesMutations } from '@/hooks/categoriesMutations';
 import { colorsMutations } from '@/hooks/colorsMutations';
 import colorSevices from '@/services/colorSevices';
 import { useQuery } from '@tanstack/react-query';
