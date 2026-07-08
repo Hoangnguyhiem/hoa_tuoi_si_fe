@@ -38,8 +38,8 @@ const ColorPage = () => {
                 </div>
                 <div className="h-[60px]"></div>
                 <div className="">
-                    {color?.map((item: any, i: number) => (
-                        <div className={`hover:bg-slate-50`}>
+                    {color?.map((item: any) => (
+                        <div key={item._id} className={`hover:bg-slate-50`}>
                             <div className="flex justify-between p-[5px_10px] items-center">
                                 <div className="">{item.name}</div>
                                 <div onClick={() => handleDeleteColor(item._id)} className="cursor-pointer flex items-center justify-center">

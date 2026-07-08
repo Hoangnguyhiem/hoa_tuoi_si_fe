@@ -173,8 +173,7 @@ const ProductPage = () => {
 			updatedId &&
 			refs.current[updatedId]
 		) {
-			refs.current[updatedId]
-				.scrollIntoView({
+			refs.current[updatedId]?.scrollIntoView({
 					behavior: "smooth",
 					block: "center"
 				});
