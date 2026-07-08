@@ -8,7 +8,7 @@ import DeliveryPage from "@/pages/(dashboard)/delivery/page";
 import ProductAddPage from "@/pages/(dashboard)/product/add/page";
 import ProductEditPage from "@/pages/(dashboard)/product/edit/page";
 import ProductPage from "@/pages/(dashboard)/product/page";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 
 const Router = () => {
@@ -16,6 +16,7 @@ const Router = () => {
     return (
         <>
             <Routes>
+                <Route path="/" element={<Navigate to="/order" replace />} />
                 <Route path="/order">
                     <Route index element={<ProductPage />} />
                     <Route path="add" element={<ProductAddPage />} />
@@ -36,6 +37,8 @@ const Router = () => {
                     <Route path="add" element={<ColorAddPage/>}/>
                     <Route path="edit/:id" element={<CategoryEditPage />}/>
                 </Route>
+
+                <Route path="*" element={<Navigate to="/order" replace />} />
             </Routes>
         </>
     );
